@@ -20,12 +20,12 @@ For this specific manual you will need the following parts:
 We are starting pretty easy! lets go and start of with preparing our board before we plug it in. Lets put the wires in the right place (dont remove or move the wires while its plugged in your laptop).
 so let start by plugging the yellow wire onto D1, The red wire onto 3V and the black one on G. It should look like something like this:
 
-<img width="250" alt="Schermafbeelding 2025-10-08 144612" src="https://github.com/user-attachments/assets/aae43817-cb13-4058-af09-fa389a33b398" />
+<img height="250" alt="Schermafbeelding 2025-10-08 144612" src="https://github.com/user-attachments/assets/aae43817-cb13-4058-af09-fa389a33b398" />
 
 Are the wires plugged into the correct pins? Continue to the next step!
 
 ### step 1.2 preparing Teamup
-In this step were going to prepare our teamup account and get the API, you can definitly use a different agenda app, but in this manual we are going to use Teamup. So lets start by making a Teamup account, after you made the account make sure to log in. Create a new agenda and then go to settings. Then go down in the navigation and click on intregration and then on API, you will see a lot information about using the API key which might be useful to you. But for now we are going to continue with getting our key. go to https://teamup.com/api-keys/request and fill out the form, you will easily get the key and then we can continue!
+In this step were going to prepare our teamup account and get the API, you can definitly use a different agenda app, but in this manual we are going to use Teamup. So lets start by making a Teamup account, after you made the account make sure to log in. Create a new agenda and then go to settings. Then go down in the navigation and click on intregration and then on API, you will see a lot information about using the API key which might be useful to you. But for now we are going to continue with getting our key. go to https://teamup.com/api-keys/request and fill out the form, you will easily get the key, copy that one and paste it somewhere safe and then we can continue!
 see the photos below for the steps. 
 
 <img  height="250" alt="Schermafbeelding 2025-10-16 124017" src="https://github.com/user-attachments/assets/e727132f-c1ea-4203-9702-0fdd4cec5e79" />
