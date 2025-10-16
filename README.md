@@ -4,7 +4,7 @@ SmartDesk is a smart and innovative desk that can help you stay active by changi
 
 
 ## Introduction
-This manual contains a step by step guide that covers a small part of the SmartDesk, it will help you connect your NodeMCU(ESP8266) with a google API and get notifications in your serial moniter to make sure you can change the height of your desk on time. We are going to go through a step by step proces and make sure that all possible errors and mistakes are covered. Making mistakes is ok, but making sure that you can fix them is even better. 
+This manual contains a step by step guide that covers a small part of the SmartDesk, it will help you connect your NodeMCU(ESP8266) with teamuo API and get notifications in your serial moniter to make sure you can change the height of your desk on time. We are going to go through a step by step proces and make sure that all possible errors and mistakes are covered. Making mistakes is ok, but making sure that you can fix them is even better. 
 ### Level
 This manual is beginner level, meaning you can use it without any experience, but it might be a little bit of a strugle so its easier if you have a small bit of experience then you can flow better throughout the steps :)
 
@@ -12,7 +12,9 @@ This manual is beginner level, meaning you can use it without any experience, bu
 ## What do you need?
 For this specific manual you will need the following parts:
 * an ESP8266 board.
+* Ledstrip
 * Arduino IDE
+* Wifi connection
 
 
 ## Step 1 preparing
@@ -24,11 +26,308 @@ so let start by plugging the yellow wire onto D1, The red wire onto 3V and the b
 
 Are the wires plugged into the correct pins? Continue to the next step!
 
+
 ### step 1.2 preparing Teamup
 In this step were going to prepare our teamup account and get the API, you can definitly use a different agenda app, but in this manual we are going to use Teamup. So lets start by making a Teamup account, after you made the account make sure to log in. Create a new agenda and then go to settings. Then go down in the navigation and click on intregration and then on API, you will see a lot information about using the API key which might be useful to you. But for now we are going to continue with getting our key. go to https://teamup.com/api-keys/request and fill out the form, you will easily get the key, copy that one and paste it somewhere safe and then we can continue!
 see the photos below for the steps. 
 
-<img  height="250" alt="Schermafbeelding 2025-10-16 124017" src="https://github.com/user-attachments/assets/e727132f-c1ea-4203-9702-0fdd4cec5e79" />
-<img  height="250" alt="Schermafbeelding 2025-10-16 124141" src="https://github.com/user-attachments/assets/741c2a2e-6ee8-4436-99c3-6d1c9c475897" />
+<img  height="300" alt="Schermafbeelding 2025-10-16 124017" src="https://github.com/user-attachments/assets/e727132f-c1ea-4203-9702-0fdd4cec5e79" />
+<img  height="300" alt="Schermafbeelding 2025-10-16 124141" src="https://github.com/user-attachments/assets/741c2a2e-6ee8-4436-99c3-6d1c9c475897" />
 
+see below at Error JSON my painful proces and mistakes.....
+
+### Step 1.3 Preparing Arduino
+So after you completed creating and making an account and getting the API key, were going to continue with preparing our arduino file. Open arduino and go to  file > examples > adafruit neopixel > simple. if you click on simple a new sketch with the neopixel code will appear. Make sure you change the pin to D1 and change the amount of pixels to the amount you have. see code below
+``` cpp
+// Which pin on the Arduino is connected to the NeoPixels?
+#define PIN        D1 // On Trinket or Gemma, suggest changing this to 1
+
+// How many NeoPixels are attached to the Arduino?
+#define NUMPIXELS 12 // Popular NeoPixel ring size
+``` 
+## step 2 
+### 2.1 copy the code
+Okay! if you made it here then lets go and code! were gonna start of quite easy, lets go to arduino and copy and paste these codeblocks in the right places. 
+lets start with the easy one, copy this code about the neopixel #include:
+``` cpp
+#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+#include <ArduinoJson.h>
+``` 
+and this one below the Neopixel #include:
+``` cpp
+const char* ssid = "jouw_wifi";
+const char* password = "wachtwoord";
+const char* url = "https://teamup.com/xxxxxx/json?apikey=xxxx";
+```
+Make sure you change it to your own wifi name and password. also make sure you get the JSON URL from teamup and copy paste it in the teamup.com. 
+Then were going to copy paste the last bit of code in the Void Setup:
+``` cpp
+Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  while(WiFi.status() != WL_CONNECTED){ delay(500); Serial.print("."); }
+  Serial.println("\nWiFi verbonden");
+
+  HTTPClient http;
+  http.begin(url);
+  int code = http.GET();
+  if(code > 0){
+    String payload = http.getString();
+    Serial.println(payload);
+
+    StaticJsonDocument<1024> doc;
+    deserializeJson(doc, payload);
+    for(JsonObject item : doc.as<JsonArray>()){
+      Serial.println(String(item["title"]) + " @ " + String(item["start"]));
+    }
+  } else {
+    Serial.println("HTTP fout: " + String(code));
+  }
+  http.end();
+```
+Make sure you paste it above the neopixel code. 
+
+#### Error httpClient
+So yea after this step i kinda went downwards with my process, the ledstrip workst but thats basically it, after i uploaded my code i kept getting the same error. The error told me that there was something wrong and missing with httpClient::begin.
+<img height="250" alt="Schermafbeelding 2025-10-16 153153" src="https://github.com/user-attachments/assets/fa944c37-c8de-43e4-bc11-cdce16a99088" />
+
+After struggeling with the code a lot i asked copilot for some help and it gave me the advice to add this to my code and it some what worked, the first error was solved. here the code that helped that problem
+
+<img height="300" alt="Schermafbeelding 2025-10-16 154055" src="https://github.com/user-attachments/assets/e97a59dd-e0b1-4fa2-9fc0-d43c286a79cf" />
+
+``` cpp
+#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+#include <WiFiClientSecure.h>
+#include <ArduinoJson.h>
+#include <Adafruit_NeoPixel.h>
+
+#ifdef __AVR__
+  #include <avr/power.h>
+#endif
+
+// WiFi-instellingen
+const char* ssid = "jouw_wifi";
+const char* password = "wifi_password";
+const char* url = "https://teamup.com/xxxxxxxxxx";
+
+// NeoPixel-instellingen
+#define PIN        D1
+#define NUMPIXELS  12
+#define DELAYVAL   500
+
+Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi verbonden");
+
+  // HTTPS-client instellen
+  WiFiClientSecure client;
+  client.setInsecure(); // Alleen voor testdoeleinden
+
+  HTTPClient http;
+  http.begin(client, url);
+  int code = http.GET();
+
+  if (code > 0) {
+    String payload = http.getString();
+    Serial.println("Ontvangen JSON:");
+    Serial.println(payload);
+
+    StaticJsonDocument<2048> doc;
+    DeserializationError error = deserializeJson(doc, payload);
+    if (error) {
+      Serial.print("JSON fout: ");
+      Serial.println(error.c_str());
+    } else {
+      // Pas dit aan op basis van de echte JSON-structuur
+      JsonArray events = doc["events"].as<JsonArray>();
+      for (JsonObject item : events) {
+        Serial.println(String(item["title"]) + " @ " + String(item["start"]));
+      }
+    }
+  } else {
+    Serial.println("HTTP fout: " + String(code));
+  }
+  http.end();
+
+#if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
+  clock_prescale_set(clock_div_1);
+#endif
+
+  pixels.begin();
+}
+
+void loop() {
+  pixels.clear();
+
+  for (int i = 0; i < NUMPIXELS; i++) {
+    pixels.setPixelColor(i, pixels.Color(0, 150, 0));
+    pixels.show();
+    delay(DELAYVAL);
+  }
+}
+```
+
+#### Error JSON
+So...yeah i thought that i fixed everything in the last step, and i was sooo wrong, I struggled so badly with getting the API key, at first i generated one and when that didnt work i did this, thinking i was correct: Go to sharing and copypaste the link thats below reader, the Key itself should always start with ks it should look something like this: https://teamup.com/xxxxxxxxxxxx (see the photo below)
+<img height="300" alt="Schermafbeelding 2025-10-16 145449" src="https://github.com/user-attachments/assets/1e1c07fe-0e07-4c26-a71a-d3fa38f83564" />
+
+<img height="300" alt="Schermafbeelding 2025-10-16 153637" src="https://github.com/user-attachments/assets/64e9fe8d-2dd6-4035-96b5-f4a5d55e014a" />
+
+This is infact NOT an API key, its just the URL for the calender..so yea make sure you get the right API key and generate one, copy that one and keep it somewhere safe. 
+Then i tried adding this, hoping that it would work but yea it didnt: 
+const char* calendarID = "ksxxxxxxxxxxxxxxxx"; // from the URL
+const char* apiKey = "xxxxxxxxxxxxxxxxx"; the generated key
+
+After uploading the new code, i got this amazing error...
+
+<img width="2480" height="751" alt="image" src="https://github.com/user-attachments/assets/645d2069-9857-46ea-b40b-fc98ead95df6" />
+
+after running my code through copilot, i got a new code, which changed a little bit, see that code below. 
+``` cpp
+#include <ESP8266WiFi.h>
+#include <WiFiClientSecure.h>
+#include <ESP8266HTTPClient.h>
+#include <ArduinoJson.h>
+
+const char* ssid = "jouw_wifi";
+const char* password = "jouw_wachtwoord";
+const char* calendarID = "xxxxxxxxxxx"; // the URL
+const char* apiKey = "xxxxxxxxxxxxxxxxxxxxxx";
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi verbonden");
+
+  WiFiClientSecure client;
+  client.setInsecure(); // Voor testdoeleinden
+
+  HTTPClient http;
+  String url = "https://api.teamup.com/" + String(calendarID) + "/events?startDate=2025-10-16&endDate=2025-10-17";
+  http.begin(client, url);
+  http.addHeader("Teamup-Token", apiKey);
+
+  int code = http.GET();
+  if (code > 0) {
+    String payload = http.getString();
+    Serial.println("JSON ontvangen:");
+    Serial.println(payload);
+
+    StaticJsonDocument<4096> doc;
+    DeserializationError error = deserializeJson(doc, payload);
+    if (error) {
+      Serial.print("JSON fout: ");
+      Serial.println(error.c_str());
+      return;
+    }
+
+    JsonArray events = doc["events"].as<JsonArray>();
+    for (JsonObject item : events) {
+      String title = item["title"];
+      String start = item["start"];
+      Serial.println(title + " @ " + start);
+    }
+  } else {
+    Serial.println("HTTP fout: " + String(code));
+  }
+  http.end();
+}
+
+void loop() {
+  // Je kunt hier je NeoPixels aansturen op basis van de data
+}
+```
+<img height="300" alt="Schermafbeelding 2025-10-16 163335" src="https://github.com/user-attachments/assets/a75c1d7a-09b3-4def-997a-b81db06f8295" />
+
+
+Then we are going to try something else, since nothing is working
+I once again put my code through arduino and i got a code back which is this: 
+<img height="300" alt="Schermafbeelding 2025-10-16 164553" src="https://github.com/user-attachments/assets/6f588da2-1d5f-41b8-baba-3d93a9b0fe82" />
+``` cpp
+#include <ESP8266WiFi.h>
+#include <WiFiClientSecure.h>
+#include <ESP8266HTTPClient.h>
+#include <ArduinoJson.h>
+
+const char* ssid = "H369A7AD075";
+const char* password = "369FA9C6CEE2";
+const char* calendarID = "ksjh1f61jx31g5h5q9";
+const char* apiKey = "dcb63a1200b4971b4a546e74d0de652515d93c5f6890b6788eb32323f3b4d308";
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi verbonden");
+
+  WiFiClientSecure client;
+  client.setInsecure(); // Voor testdoeleinden
+
+  HTTPClient http;
+  String url = "https://api.teamup.com/" + String(calendarID) + "/events?startDate=2025-10-16&endDate=2025-10-22";
+  http.begin(client, url);
+  http.addHeader("Teamup-Token", apiKey);
+
+  int code = http.GET();
+  if (code > 0) {
+    String payload = http.getString();
+    Serial.println("Payload lengte: " + String(payload.length()));
+    Serial.println("JSON ontvangen:");
+    Serial.println(payload);
+
+    if (payload.length() == 0) {
+      Serial.println("Lege payload ontvangen. Controleer API key of URL.");
+      return;
+    }
+
+    StaticJsonDocument<4096> doc;
+    DeserializationError error = deserializeJson(doc, payload);
+    if (error) {
+      Serial.print("JSON fout: ");
+      Serial.println(error.c_str());
+      return;
+    }
+
+    if (!doc.containsKey("events")) {
+      Serial.println("Geen 'events' sleutel gevonden in JSON.");
+      return;
+    }
+
+    JsonArray events = doc["events"].as<JsonArray>();
+    for (JsonObject item : events) {
+      String title = item["title"] | "Geen titel";
+      String start = item["start"] | "Geen starttijd";
+      Serial.println(title + " @ " + start);
+    }
+  } else {
+    Serial.println("HTTP fout: " + String(code));
+  }
+  http.end();
+}
+
+void loop() {
+  // Hier kun je je NeoPixels aansturen op basis van de data
+}
+```
+This does work! but the problem is now with the JSON because it keeps coming back empty. Make sure you have the URL on Read-Only (NOT on read only, no details). 
+
+<img height="300" alt="Schermafbeelding 2025-10-16 164916" src="https://github.com/user-attachments/assets/977a9f55-5a06-4795-a891-398874661084" />
+
+Another mistake that i accidentally made was picking the wrong serial number, make sure that the one in your code and serial monitor are the same otherwise you are not gonna be able to see anything. see the photo below if its not clear yet. 
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/f3752ffb-804e-4683-8e51-a07df07dc0ef" />
 
