@@ -6,7 +6,8 @@ SmartDesk is a smart and innovative desk that can help you stay active by changi
 ## Introduction
 This manual contains a step by step guide that covers a small part of the SmartDesk, it will help you connect your NodeMCU(ESP8266) with teamuo API and get notifications in your serial moniter to make sure you can change the height of your desk on time. We are going to go through a step by step proces and make sure that all possible errors and mistakes are covered. Making mistakes is ok, but making sure that you can fix them is even better. 
 ### Level
-This manual is beginner level, meaning you can use it without any experience, but it might be a little bit of a strugle so its easier if you have a small bit of experience then you can flow better throughout the steps :)
+This manual is beginner level, meaning you can use it without any experience, but it might be a little bit of a strugle so its easier if you have a small bit of experience then you can flow better throughout the steps :) 
+(if everything would've worked...)
 
 
 ## What do you need?
