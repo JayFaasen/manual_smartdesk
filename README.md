@@ -356,10 +356,10 @@ this didnt work, so after that i made a few other changes and the code was
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
 
-const char* ssid = "H369A7AD075";
-const char* password = "369FA9C6CEE2";
-const char* calendarID = "ksjh1f61jx31g5h5q9"; // Juiste ID uit je Teamup-link
-const char* apiKey = "dcb63a1200b4971b4a546e74d0de652515d93c5f6890b6788eb32323f3b4d308";
+const char* ssid = "wifiname";
+const char* password = "wifipassword";
+const char* calendarID = "xxxxxxxx"; // Juiste ID uit je Teamup-link
+const char* apiKey = "xxxxxxxxxxxxxxxxxxxxxxx";
 
 void setup() {
   Serial.begin(115200);
